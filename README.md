@@ -46,10 +46,24 @@ Then in Claude Code: `/maat <file-path-or-text-or-url>`
 
 The skill produces:
 
-- **Executive verdict** (SLOP CRÍTICO / MODERADO / BAJO / LIMPIO)
+- **Executive verdict** (SLOP CRÍTICO / MODERADO / RIESGO BAJO / LIMPIO)
 - **Per-principle audit** (PASS/WARN/FAIL with literal evidence)
 - **Top 5 dangerous claims** table
 - **Counter-analysis** (auto-generated when missing)
+- **Maat score 0–10** in a machine-readable `MAAT_REPORT` block at the end
+
+### Score
+
+Each principle scores PASS = 1.0 · WARN = 0.5 · FAIL = 0.0 · N/A excluded. Principles 2 (traceability), 7 (uncertainty), and 8 (counter-analysis) carry double weight. The score is rounded to one decimal and mapped to a verdict:
+
+| Score | Verdict |
+|---|---|
+| 0.0 – 2.9 | SLOP_CRITICO |
+| 3.0 – 5.9 | SLOP_MODERADO |
+| 6.0 – 7.9 | RIESGO_BAJO |
+| 8.0 – 10.0 | LIMPIO |
+
+Recommended blocking threshold: **7.0** for decision-grade documents, **5.0** for early drafts. Hard fails on principle 1 or on principle 8 (when the artifact is decision-grade) force `blocking: true` regardless of score.
 
 ## Author
 

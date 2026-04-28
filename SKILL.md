@@ -137,6 +137,52 @@ A table of the top 5 unsourced or weakly-sourced strategic claims:
 
 If principle 8 fails, generate the missing counter-analysis. Don't ask permission — produce it.
 
+### E. MAAT_REPORT (machine-readable footer — MANDATORY)
+
+Every audit MUST end with a fenced code block exactly in this format. This block is the score signal a human or any external system can read at a glance. Do not omit it. Do not add commentary inside the block.
+
+```
+MAAT_REPORT
+score: 7.3
+verdict: RIESGO_BAJO
+threshold_recommended: 7.0
+blocking: false
+principles:
+  1_ai_not_source: PASS
+  2_traceability: WARN
+  3_state_separation: PASS
+  4_expert_review: WARN
+  5_prompt_governance: N/A
+  6_rag_curation: N/A
+  7_uncertainty_survives: FAIL
+  8_counter_analysis: FAIL
+  9_decision_grade_controls: WARN
+  10_production_sampling: PASS
+counts: pass=3 warn=3 fail=2 na=2
+top_findings:
+  - "one-line finding 1"
+  - "one-line finding 2"
+  - "one-line finding 3"
+```
+
+## Scoring rules (deterministic)
+
+Compute the score with this exact procedure so the output is comparable across runs:
+
+1. **Per-principle value:** PASS = 1.0, WARN = 0.5, FAIL = 0.0, N/A = excluded.
+2. **Weights:** principles 2 (traceability), 7 (uncertainty), and 8 (counter-analysis) have weight **2**. All other principles have weight **1**.
+3. **Score formula:** `score = (Σ value_i × weight_i) / (Σ weight_i for non-N/A principles) × 10`, rounded to one decimal.
+4. **Verdict mapping:**
+   - `0.0 – 2.9` → `SLOP_CRITICO`
+   - `3.0 – 5.9` → `SLOP_MODERADO`
+   - `6.0 – 7.9` → `RIESGO_BAJO`
+   - `8.0 – 10.0` → `LIMPIO`
+5. **Recommended blocking threshold:** `7.0` for documents that inform decisions; `5.0` for drafts in early review. Always emit `threshold_recommended: 7.0` unless the user requested otherwise.
+6. **`blocking: true`** if `score < threshold_recommended`, else `false`.
+7. **Hard fails override score:** if principle 1 (AI as source) FAILs OR principle 8 (counter-analysis) FAILs on a decision-grade artifact (principle 9 also FAIL/WARN), set `blocking: true` regardless of score and cap verdict at `SLOP_MODERADO` or worse.
+
+The score is not a license to ignore findings. It is a one-glance signal. The body of the audit is still the truth.
+
 ## Operating rules
 
 1. **Cita literal.** Always quote the offending passage. Never paraphrase a finding without the original text — that would be doing slop while auditing slop.
@@ -186,10 +232,15 @@ Audit the **pipeline**:
 
 ## Closing line
 
-After every audit, end with one of:
+After the MAAT_REPORT block, end with one of:
 
 - **"Esto no se arregla con un mejor modelo. Se arregla con disciplina documental."** (when the failure is governance)
 - **"El problema no es la alucinación. Es que la organización alucina que está informada."** (when the failure is cultural)
-- **"Limpio. Maat aprueba."** (when the artifact passes)
+- **"Limpio. Maat aprueba."** (when the artifact passes — score ≥ 8.0)
 
 Never both. Choose one based on the verdict.
+
+## Output order recap
+
+The audit must always be emitted in this order, no exceptions:
+A. Veredicto ejecutivo → B. Per-principle audit → C. Top 5 dangerous claims → D. Counter-analysis (if applicable) → E. MAAT_REPORT block → Closing line.
