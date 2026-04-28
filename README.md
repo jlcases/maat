@@ -1,8 +1,14 @@
-# Maat
+# Maat — Anti AI Slop Skill for Claude Code
 
-Claude Code skill to audit AI slop in business artifacts — reports, M&A memos, board decks, RAG pipelines, prompt libraries.
+Audit AI slop in business artifacts: strategic reports, M&A memos, board decks, RAG pipelines, and prompt libraries. A Claude Code skill that detects untraceable claims, fake authority, lost uncertainty, missing counter-analysis, and prompt bias in AI-generated or AI-assisted documents.
 
 > The problem is not that AI hallucinates. The problem is that organizations hallucinate that they are informed.
+
+## Why "Maat"?
+
+In Egyptian cosmology, Maat is the goddess of truth, balance, and cosmic order — the principle that weighs the heart of the dead against a feather. Lighter than the feather, you pass. Heavier, you don't.
+
+The premise of this skill: AI slop is what happens when organizations stop weighing claims against evidence and start trusting fluent prose. Maat audits the gap between *what looks verified* and *what actually is*.
 
 ## What it audits
 
